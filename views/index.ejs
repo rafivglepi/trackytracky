@@ -1,0 +1,463 @@
+<!-- index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mouse and Touch Tracker</title>
+</head>
+<body>
+    <h1 class="tracker-1" id="tracker-id-1">Mouse and Touch Tracker</h1>
+    <h1 class="tracker-2" id="tracker-id-2">Mouse and Touch Tracker</h1>
+    <h1 class="tracker-3" id="tracker-id-3">Mouse and Touch Tracker</h1>
+    <h1 class="tracker-4" id="tracker-id-4">Mouse and Touch Tracker</h1>
+    <h1 class="tracker-5" id="tracker-id-5">Mouse and Touch Tracker</h1>
+    <h1 class="tracker-6" id="tracker-id-6">Mouse and Touch Tracker</h1>
+    <h1 class="tracker-7" id="tracker-id-7">Mouse and Touch Tracker</h1>
+    <h1 class="tracker-8" id="tracker-id-8">Mouse and Touch Tracker</h1>
+    <h1 class="tracker-9" id="tracker-id-9">Mouse and Touch Tracker</h1>
+    <h1 class="tracker-10" id="tracker-id-10">Mouse and Touch Tracker</h1>
+    <h1 class="tracker-11" id="tracker-id-11">Mouse and Touch Tracker</h1>
+    <h1 class="tracker-12" id="tracker-id-12">Mouse and Touch Tracker</h1>
+    <h1 class="tracker-13" id="tracker-id-13">Mouse and Touch Tracker</h1>
+    <h1 class="tracker-14" id="tracker-id-14">Mouse and Touch Tracker</h1>
+    <h1 class="tracker-15" id="tracker-id-15">Mouse and Touch Tracker</h1>    
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+    <h1>Mouse and Touch Tracker</h1>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // tagName = null when its out of or into the window
+        const socket = io();
+
+        function getElementPath(element) {
+            const path = [];
+            let current = element;
+            while (current !== document.body) {
+                let tagName = current.tagName.toLowerCase();
+                let index = 1;
+                while (current.previousElementSibling) {
+                    current = current.previousElementSibling;
+                    if (current.tagName.toLowerCase() === tagName) {
+                        index++;
+                    }
+                }
+                path.unshift(tagName + ':nth-child(' + index + ')');
+                current = current.parentElement;
+            }
+            return path.join(' > ');
+        }
+
+        // Track page load
+        window.addEventListener('load', () => {
+            socket.emit('pageLoad', {
+                url: window.location.href,
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        // Track page unload
+        window.onbeforeunload = function() {
+            socket.emit('onbeforeunload', {
+                url: window.location.href,
+                timestamp: new Date().toISOString()
+            });
+        };
+
+        // Track hash
+        window.addEventListener('hashchange', () => {
+            socket.emit('hashChange', {
+                newHash: window.location.hash,
+                timestamp: new Date().toISOString()
+            });
+        });
+        
+        // Track mouse movements
+        document.addEventListener('mousemove', (event) => {
+            socket.emit('mouseMove', { x: event.clientX, y: event.clientY });
+        });
+
+        // Track click
+        document.querySelectorAll('*').forEach(element => {
+            element.addEventListener('mousedown', (event) => {
+                socket.emit('elementClick', {
+                    x: event.clientX,
+                    y: event.clientY,
+                    button: event.button,
+                    element: element.tagName.toLowerCase(),
+                    id: element.id,
+                    classList: Array.from(element.classList),
+                    path: getElementPath(element),
+                    text: (element.tagName.toLowerCase() === 'body') ? 'none' : (element.textContent.trim() || element.innerHTML.trim()),
+                    timestamp: new Date().toISOString(),
+                    viewportDimensions: {
+                        width: window.innerWidth,
+                        height: window.innerHeight
+                    },
+                    scrollPosition: {
+                        x: window.scrollX,
+                        y: window.scrollY
+                    }
+                });
+                event.stopPropagation();
+            });
+        });
+
+        // Track right-click
+        document.querySelectorAll('*').forEach(element => {
+            element.addEventListener('contextmenu', (event) => {
+                socket.emit('elementRightClick', {
+                    x: event.clientX,
+                    y: event.clientY,
+                    button: event.button,
+                    element: element.tagName.toLowerCase(),
+                    id: element.id,
+                    classList: Array.from(element.classList),
+                    path: getElementPath(element),
+                    text: (element.tagName.toLowerCase() === 'body') ? 'none' : (element.textContent.trim() || element.innerHTML.trim()),
+                    timestamp: new Date().toISOString(),
+                    viewportDimensions: {
+                        width: window.innerWidth,
+                        height: window.innerHeight
+                    },
+                    scrollPosition: {
+                        x: window.scrollX,
+                        y: window.scrollY
+                    }
+                });
+                event.stopPropagation();
+            });
+        });
+
+        // Track double-click
+        document.querySelectorAll('*').forEach(element => {
+            element.addEventListener('dblclick', (event) => {
+                socket.emit('elementDoubleClick', {
+                    x: event.clientX,
+                    y: event.clientY,
+                    button: event.button,
+                    element: element.tagName.toLowerCase(),
+                    id: element.id,
+                    classList: Array.from(element.classList),
+                    path: getElementPath(element),
+                    text: (element.tagName.toLowerCase() === 'body') ? 'none' : (element.textContent.trim() || element.innerHTML.trim()),
+                    timestamp: new Date().toISOString(),
+                    viewportDimensions: {
+                        width: window.innerWidth,
+                        height: window.innerHeight
+                    },
+                    scrollPosition: {
+                        x: window.scrollX,
+                        y: window.scrollY
+                    }
+                });
+                event.stopPropagation();
+            });
+        });
+
+        // Track hover
+        document.querySelectorAll('*').forEach(element => {
+            element.addEventListener('mouseenter', (event) => {
+                socket.emit('elementHover', {
+                    x: event.clientX,
+                    y: event.clientY,
+                    element: element.tagName.toLowerCase(),
+                    id: element.id,
+                    classList: Array.from(element.classList),
+                    path: getElementPath(element),
+                    timestamp: new Date().toISOString(),
+                    viewportDimensions: {
+                        width: window.innerWidth,
+                        height: window.innerHeight
+                    },
+                    scrollPosition: {
+                        x: window.scrollX,
+                        y: window.scrollY
+                    }
+                });
+            });
+        });
+
+        // Track scroll position
+        window.addEventListener('scroll', () => {
+            const scrollPosition = {
+                x: window.scrollX,
+                y: window.scrollY
+            };
+            socket.emit('scroll', scrollPosition);
+        });
+
+        // Track element scroll into view
+        document.querySelectorAll('*').forEach(element => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        socket.emit('elementScrollIntoView', {
+                            elementType: entry.target.tagName.toLowerCase(),
+                            elementId: entry.target.id,
+                            timestamp: new Date().toISOString()
+                        });
+                        observer.unobserve(entry.target);
+                    }
+                });
+            });
+            observer.observe(element);
+        });
+
+        // Track element scroll out of view
+        document.querySelectorAll('*').forEach(element => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) {
+                        socket.emit('elementScrollOutOfView', {
+                            elementType: entry.target.tagName.toLowerCase(),
+                            elementId: entry.target.id,
+                            timestamp: new Date().toISOString()
+                        });
+                        observer.unobserve(entry.target);
+                    }
+                });
+            });
+            observer.observe(element);
+        });
+
+        // Track element resize
+        const resizeObserver = new ResizeObserver(entries => {
+            entries.forEach(entry => {
+                socket.emit('elementResize', {
+                    elementType: entry.target.tagName.toLowerCase(),
+                    elementId: entry.target.id,
+                    size: {
+                        width: entry.target.offsetWidth,
+                        height: entry.target.offsetHeight
+                    },
+                    timestamp: new Date().toISOString()
+                });
+            });
+        });
+        document.querySelectorAll('*').forEach(element => {
+            resizeObserver.observe(element);
+        });
+
+        // Track touch movements
+        document.addEventListener('touchmove', (event) => {
+            const touch = event.touches[0];
+            const { clientX, clientY } = touch;
+            socket.emit('touchMove', { x: clientX, y: clientY });
+        });
+
+        // Track touch clicks
+        document.addEventListener('touchstart', (event) => {
+            const touch = event.touches[0];
+            const { clientX, clientY } = touch;
+            socket.emit('touchClick', { x: clientX, y: clientY });
+        });
+
+        // Track touch end
+        document.addEventListener('touchend', (event) => {
+            const touch = event.changedTouches[0];
+            const { clientX, clientY } = touch;
+            socket.emit('touchEnd', { x: clientX, y: clientY });
+        });
+
+        // Track keyboard
+        document.addEventListener('keydown', (event) => {
+            socket.emit('keyPress', {
+                key: event.key,
+                keyCode: event.keyCode,
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        // Track element focus
+        document.querySelectorAll('*').forEach(element => {
+            element.addEventListener('focus', (event) => {
+                socket.emit('elementFocus', {
+                    elementType: element.tagName.toLowerCase(),
+                    elementId: element.id,
+                    timestamp: new Date().toISOString()
+                });
+            });
+        });
+
+        // Track element blur
+        document.querySelectorAll('*').forEach(element => {
+            element.addEventListener('blur', (event) => {
+                socket.emit('elementBlur', {
+                    elementType: element.tagName.toLowerCase(),
+                    elementId: element.id,
+                    timestamp: new Date().toISOString()
+                });
+            });
+        });
+
+        // Track window visibility
+        document.addEventListener('visibilitychange', () => {
+            socket.emit('visibilityChange', {
+                visibilityState: document.visibilityState,
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        // Track window focus
+        window.addEventListener('focus', () => {
+            socket.emit('windowFocus', {
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        // Track window blur
+        window.addEventListener('blur', () => {
+            socket.emit('windowBlur', {
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        // Track window resizing
+        window.addEventListener('resize', () => {
+            socket.emit('resize', {
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+        });
+
+        // Track form submission
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', (event) => {
+                const formData = new FormData(form);
+                const formValues = {};
+                formData.forEach((value, key) => formValues[key] = value);
+                socket.emit('formSubmission', {
+                    formId: form.id,
+                    formAction: form.action,
+                    formMethod: form.method,
+                    formValues: formValues,
+                    timestamp: new Date().toISOString()
+                });
+            });
+        });
+
+        // Track input changes
+        document.querySelectorAll('input, select, textarea').forEach(input => {
+            input.addEventListener('input', (event) => {
+                socket.emit('inputChange', {
+                    elementType: input.tagName.toLowerCase(),
+                    elementId: input.id,
+                    value: input.value,
+                    timestamp: new Date().toISOString()
+                });
+            });
+        });
+
+        // Track copy
+        document.addEventListener('copy', (event) => {
+            socket.emit('copyEvent', {
+                copiedData: (event.clipboardData || window.clipboardData).getData('text'),
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        // Track cut
+        document.addEventListener('cut', (event) => {
+            socket.emit('cutEvent', {
+                cutData: (event.clipboardData || window.clipboardData).getData('text'),
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        // Track video
+        document.querySelectorAll('video').forEach(video => {
+            // Track play
+            video.addEventListener('play', () => {
+                socket.emit('videoEvent.play', {
+                    videoSrc: video.currentSrc,
+                    timestamp: new Date().toISOString()
+                });
+            });
+            // Track pause
+            video.addEventListener('pause', () => {
+                socket.emit('videoEvent.pause', {
+                    videoSrc: video.currentSrc,
+                    timestamp: new Date().toISOString()
+                });
+            });
+            // Track timestamp
+            video.addEventListener('timeupdate', () => {
+                socket.emit('videoEvent.timeupdate', {
+                    videoSrc: video.currentSrc,
+                    currentTime: video.currentTime,
+                    timestamp: new Date().toISOString()
+                });
+            });
+        });
+
+        // Track file upload
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', (event) => {
+                const fileList = input.files;
+                const fileNames = [];
+                for (let i = 0; i < fileList.length; i++) {
+                    fileNames.push(fileList[i].name);
+                }
+                socket.emit('fileUpload', {
+                    elementType: input.tagName.toLowerCase(),
+                    elementId: input.id,
+                    files: fileNames,
+                    timestamp: new Date().toISOString()
+                });
+            });
+        });
+
+        // Track error events
+        window.addEventListener('error', (event) => {
+            socket.emit('errorEvent', {
+                message: event.message,
+                filename: event.filename,
+                lineno: event.lineno,
+                colno: event.colno,
+                error: event.error ? event.error.stack : null,
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        (function(){var scriptTag=document.currentScript||document.getElementsByTagName('script').pop();scriptTag.parentNode.removeChild(scriptTag);})();
+    </script>
+</body>
+</html>
